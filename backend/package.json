@@ -1,0 +1,41 @@
+{
+  "name": "platify",
+  "version": "1.0.0",
+  "description": "This app allows you to automatically put the music you like on YouTube in a playlist of your favorite streaming platform.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexandre-schaffner/platify.git"
+  },
+  "keywords": [
+    "YouTube",
+    "Deezer",
+    "Spotify",
+    "Platform",
+    "Streaming",
+    "Music"
+  ],
+  "author": "Alexandre Schaffner",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "google-auth-library": "^7.5.0",
+    "googleapis": "^78.0.0",
+    "jose": "^3.13.0",
+    "mongod": "^2.0.0",
+    "mongodb": "^3.6.10"
+  },
+  "devDependencies": {
+    "eslint": "^7.31.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "nodemon": "^2.0.7"
+  }
+}
