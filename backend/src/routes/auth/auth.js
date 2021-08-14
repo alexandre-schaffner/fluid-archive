@@ -1,5 +1,4 @@
-
-module.exports = function (app, db, credentials, oauth2ClientMap) {
+module.exports = async function (app, db, credentials, oauth2ClientMap) {
   const user = require('../../middlewares/user')
   const { google } = require('googleapis')
   const OAuth2 = google.auth.OAuth2
@@ -13,7 +12,7 @@ module.exports = function (app, db, credentials, oauth2ClientMap) {
   })
 
   app.get('/logged', function (req, res) {
-    res.send('Successfully logged in')
+    res.send('Credentials are correct')
   })
 
   app.get('/oauth2callback', function (req, res) {
@@ -28,7 +27,7 @@ module.exports = function (app, db, credentials, oauth2ClientMap) {
       if (req.query.error === 'access_denied') {
         res.send('You need to authorize the app to use it')
       } else {
-        res.send('Sorry, an error occured')
+        res.send('Sorry, an error occured: ' + req.query.error)
       }
     } else {
       oauth2Client.getToken(code, (err, token) => {
@@ -41,7 +40,7 @@ module.exports = function (app, db, credentials, oauth2ClientMap) {
               console.log(err)
             } else {
               collection.updateOne(
-                { 'logins.email': infos.email },
+                { _id: infos.email },
                 {
                   $set: {
                     google: {
@@ -62,9 +61,9 @@ module.exports = function (app, db, credentials, oauth2ClientMap) {
               })
             }
           })
+          res.redirect('/logged')
         }
       })
-      res.redirect('/logged')
     }
   })
 }

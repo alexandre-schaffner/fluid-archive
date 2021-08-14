@@ -17,7 +17,7 @@ function main () {
     'secret/oauth2Secret.json',
     function (err, data) {
       if (err) {
-        console.log('Failed to open client secret file: ' + err)
+        console.error('Failed to open client secret file: ' + err)
         return
       }
       auth(app, db, JSON.parse(data), oauth2ClientMap)

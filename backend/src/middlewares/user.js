@@ -1,23 +1,23 @@
-function checkExistingUser (collection, email, res, callback) {
-  const query = { 'logins.email': email }
-  const options = { projection: { _id: 0, logins: { email: 1 } } }
-
-  collection.findOne(query, options).then((result, error) => {
-    if (error) {
-      throw error
-    } else {
-      if (result != null) {
-        res.send('Sorry, an account is already signed up with this email address.')
-      } else {
-        callback()
-      }
+async function checkExistingUser (users, email) {
+  const query = {
+    _id: email
+  }
+  const options = {
+    projection: {
+      _id: 1
     }
-  })
+  }
+  try {
+    const existingUser = await users.findOne(query, options)
+    return (existingUser)
+  } catch (err) {
+    throw new Error(err)
+  }
 }
 
-module.exports.register = function (req, res, db, credentials, oauth2ClientMap) {
+module.exports.register = async function (req, res, db, credentials, oauth2ClientMap) {
   const bcrypt = require('bcryptjs')
-  const collection = db.collection('users')
+  const users = db.collection('users')
   const { google } = require('googleapis')
   const OAuth2 = google.auth.OAuth2
   const oauth2Client = new OAuth2(
@@ -34,54 +34,60 @@ module.exports.register = function (req, res, db, credentials, oauth2ClientMap) 
     ],
     login_hint: req.body.email
   })
-
-  checkExistingUser(collection, req.body.email, res, () => {
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) {
-        res.send('An error occured, please retry.')
-        throw err
+  try {
+    const existingUser = await checkExistingUser(users, req.body.email)
+    if (existingUser !== null) {
+      throw new Error('User already exists.')
+    }
+    const salt = await bcrypt.genSalt(10)
+    const hash = await bcrypt.hash(req.body.password, salt)
+    const doc = {
+      _id: req.body.email,
+      password: hash,
+      google: {
+        userId: null,
+        tokens: {
+          accessToken: null,
+          refreshToken: null
+        }
+      },
+      platform: {
+        platform: req.body.platform,
+        playlist: req.body.playlist,
+        accessToken: null,
+        refreshToken: null
       }
-      bcrypt.hash(req.body.password, salt, (err, hash) => {
-        if (err) {
-          res.send('An error occured, please retry.')
-          throw err
-        }
-        const doc = {
-          logins: {
-            email: req.body.email,
-            password: hash
-          },
-          google: {
-            userId: null,
-            tokens: {
-              accessToken: null,
-              refreshToken: null
-            }
-          },
-          platform: {
-            platform: req.body.platform,
-            playlist: req.body.playlist,
-            accessToken: null,
-            refreshToken: null
-          }
-        }
-        collection.insertOne(doc, (error, result) => {
-          if (error || result.insertedCount !== 1) {
-            res.send('Sorry, an error occured during your registration...')
-          } else {
-            res.send('We\'re almost done, authorize this app by visiting this url: ' + authUrl)
-          }
-        })
-      })
-    })
-  })
+    }
+    const result = await users.insertOne(doc)
+    if (result.insertedCount !== 1) {
+      throw new Error('An error occured while inserting your data in the db')
+    } else {
+      res.send('We\'re almost done, authorize this app by visiting this url: ' + authUrl)
+    }
+  } catch (err) {
+    res.send(err.message)
+  }
 }
 
-/* module.exports.login = function (req, res, db) {
+module.exports.login = async function (req, res, db) {
   const bcrypt = require('bcryptjs')
-  const collection = db.collection('user')
-  const query = { 'logins.password': req.body.password }
-  const options = { projection: { _id: 0, logins: { email: 1 } } }
+  const users = db.collection('users')
+  const query = { _id: req.body.email }
+  const options = { projection: { _id: 1, password: 1 } }
 
-  collection.findOne
-} */
+  try {
+    const result = await users.findOne(query, options)
+    if (result === null) {
+      throw new Error('You are not registered yet.')
+    } else {
+      const passwordCheck = await bcrypt.compare(req.body.password, result.password)
+      if (passwordCheck === true) {
+        res.send('Sucessfully logged in')
+      } else {
+        throw new Error('Wrong password.')
+      }
+    }
+  } catch (err) {
+    res.send(err.message)
+  }
+}
