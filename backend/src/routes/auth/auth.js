@@ -15,7 +15,7 @@ module.exports = async function (app, db, credentials, oauth2ClientMap) {
     res.send('Credentials are correct')
   })
 
-  app.get('/oauth2callback', async function (req, res) {
+  app.get('/oauth2callback', function (req, res) {
     const collection = db.collection('users')
     const code = req.query.code
     const oauth2Client = new OAuth2(
@@ -37,7 +37,6 @@ module.exports = async function (app, db, credentials, oauth2ClientMap) {
           } else {
             oauth2Client.setCredentials(token)
             const infos = await oauth2Client.getTokenInfo(oauth2Client.credentials.access_token)
-            console.log(oauth2Client.credentials)
             await collection.updateOne(
               { _id: infos.email },
               {
