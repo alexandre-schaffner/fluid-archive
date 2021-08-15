@@ -15,7 +15,7 @@ async function checkExistingUser (users, email) {
   }
 }
 
-module.exports.register = async function (req, res, db, credentials, oauth2ClientMap) {
+module.exports.register = async function (req, res, db, credentials) {
   const bcrypt = require('bcryptjs')
   const users = db.collection('users')
   const { google } = require('googleapis')
@@ -71,6 +71,8 @@ module.exports.register = async function (req, res, db, credentials, oauth2Clien
 
 module.exports.login = async function (req, res, db) {
   const bcrypt = require('bcryptjs')
+  const crypto = require('crypto')
+  const { SignJWT } = require('jose/jwt/sign')
   const users = db.collection('users')
   const query = { _id: req.body.email }
   const options = { projection: { _id: 1, password: 1 } }
@@ -82,7 +84,14 @@ module.exports.login = async function (req, res, db) {
     } else {
       const passwordCheck = await bcrypt.compare(req.body.password, result.password)
       if (passwordCheck === true) {
-        res.send('Sucessfully logged in')
+        const jwt = await new SignJWT({ sub: result._id })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setIssuer('fluid')
+          .setAudience('http://localhost:' + process.env.PORT)
+          .setExpirationTime('10min')
+          .sign(crypto.createSecretKey(process.env.SECRET))
+        res.send(jwt)
       } else {
         throw new Error('Wrong password.')
       }
@@ -90,4 +99,15 @@ module.exports.login = async function (req, res, db) {
   } catch (err) {
     res.send(err.message)
   }
+}
+
+module.exports.deezerAuth = function (req, res, oauth2ClientMap) {
+  const querystring = require('querystring')
+  const query = {
+    app_id: process.env.DEEZER_APP_ID,
+    redirect_uri: 'http://localhost:3000/deezercallback',
+    perms: 'offline_access,manage_library'
+  }
+
+  res.send('https://connect.deezer.com/oauth/auth.php?' + querystring.stringify(query))
 }
