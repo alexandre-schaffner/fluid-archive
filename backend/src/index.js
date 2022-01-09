@@ -4,6 +4,7 @@ async function main () {
   const db = require('./database/db')
   const express = require('express')
   const fs = require('fs')
+  // const getLastLikedVideo = require('./middlewares/getLastLikedVideo')
   const putInUsersMap = require('./middlewares/putInUsersMap')
   const sync = require('./routes/sync')
 
@@ -19,7 +20,16 @@ async function main () {
 
     const results = await usersCollection.find({ sync: true }, { projection: { _id: 1 } })
     for await (const user of results) {
-      await putInUsersMap(credentials, user._id, usersMap, usersCollection)
+      try {
+        await putInUsersMap(credentials, user._id, usersMap, usersCollection)
+      } catch (err) {
+        await usersCollection.updateOne(
+          { _id: user._id },
+          {
+            $set: { sync: false }
+          }
+        )
+      }
     }
     console.log(usersMap)
 
@@ -27,13 +37,22 @@ async function main () {
 
     sync(app, credentials, usersCollection, usersMap)
     auth(app, usersCollection, credentials, usersMap)
+    setInterval(async (usersMap) => {
+      if (usersMap.size) {
+        for await (const [key, value] of usersMap.entries()) {
+          console.log(key, value)
+          // await getLastLikedVideo(user.google.oauth2Client, user.google.accessToken)
+        }
+      }
+      console.log(usersMap)
+    }, 5000, usersMap)
     // setInterval, checkNewSongs(usersMap)
 
     app.listen(port, function () {
       console.log('Platify listening at http://localhost:' + port)
     })
   } catch (err) {
-    console.error(err.message)
+    console.error(err)
   }
 }
 
