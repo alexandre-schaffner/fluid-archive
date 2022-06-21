@@ -8,7 +8,7 @@ module.exports = async ({ artist, title }) => {
   })
   for (let i = 0; i < response.total; i++) {
     if (
-      response.data[i].artist.name === artist &&
+      // response.data[i].artist.name === artist &&
       response.data[i].title === title
     ) return response.data[i].id
   }
