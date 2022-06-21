@@ -1,8 +1,8 @@
 
 module.exports.getPlatformTokens = async (users, id) => {
-  const ObjectID = require('mongodb').ObjectID
+  const ObjectId = require('mongodb').ObjectId
   const options = { projection: { 'platform.tokens': 1 } }
-  const query = { _id: ObjectID(id) }
+  const query = { _id: ObjectId(id) }
   const result = await users.findOne(query, options)
 
   if (result === null) {
@@ -13,9 +13,9 @@ module.exports.getPlatformTokens = async (users, id) => {
 }
 
 module.exports.getGoogleTokens = async (users, id) => {
-  const ObjectID = require('mongodb').ObjectID
+  const ObjectId = require('mongodb').ObjectId
   const options = { projection: { 'google.tokens': 1 } }
-  const query = { _id: ObjectID(id) }
+  const query = { _id: ObjectId(id) }
   const result = await users.findOne(query, options)
 
   if (result === null) {

@@ -2,3 +2,4 @@
 backend/secret/
 backend/node_modules/
 backend/.env
+backend/X509-cert-431020356886184745.pem

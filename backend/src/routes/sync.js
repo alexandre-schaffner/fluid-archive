@@ -1,13 +1,13 @@
 
 module.exports = (app, credentials, usersCollection, usersMap) => {
   const checkJWT = require('../middlewares/checkJWT')
-  const { ObjectID } = require('mongodb')
+  const { ObjectId } = require('mongodb')
   const putInUsersMap = require('../middlewares/putInUsersMap')
 
   app.get('/is_sync', async (req, res) => {
     try {
       const jwt = await checkJWT(req, usersCollection)
-      const mongoId = ObjectID(jwt.sub)
+      const mongoId = ObjectId(jwt.sub)
 
       const result = await usersCollection.findOne({ _id: mongoId }, { projection: { sync: 1 } })
       res.send({
@@ -21,7 +21,7 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
   app.get('/sync', async (req, res) => {
     try {
       const jwt = await checkJWT(req, usersCollection)
-      const mongoId = ObjectID(jwt.sub)
+      const mongoId = ObjectId(jwt.sub)
 
       const updateRes = await usersCollection.updateOne(
         { _id: mongoId },
@@ -34,7 +34,6 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
       }
       await putInUsersMap(credentials, mongoId, usersMap, usersCollection)
       res.send({ state: 'sync' })
-      console.log(usersMap)
     } catch (err) {
       res.send(err.message)
     }
@@ -43,7 +42,7 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
   app.get('/unsync', async (req, res) => {
     try {
       const jwt = await checkJWT(req, usersCollection)
-      const mongoId = ObjectID(jwt.sub)
+      const mongoId = ObjectId(jwt.sub)
       const stringId = mongoId.toHexString()
 
       const updateRes = await usersCollection.updateOne(

@@ -141,7 +141,7 @@ module.exports.login = async function (req, res, users) {
 *    On this page, the user should authorize the app.
 */
 module.exports.googleAuth = async function (req, res, credentials, users) {
-  const ObjectID = require('mongodb').ObjectID
+  const ObjectId = require('mongodb').ObjectId
   const checkJWT = require('./checkJWT')
   const { google } = require('googleapis')
   const OAuth2 = google.auth.OAuth2
@@ -152,7 +152,7 @@ module.exports.googleAuth = async function (req, res, credentials, users) {
 
   try {
     const token = await checkJWT(req, users)
-    const query = { _id: ObjectID(token.sub) }
+    const query = { _id: ObjectId(token.sub) }
     const options = { projection: { email: 1 } }
     const result = await users.findOne(query, options)
     const authUrl = oauth2Client.generateAuthUrl({
@@ -200,12 +200,12 @@ module.exports.deezerAuth = async function (req, res, users) {
 * Retrieve deezer access token and store it in the db.
 */
 module.exports.getDeezerToken = async function (req, res, users, usersMap) {
-  const ObjectID = require('mongodb').ObjectID
+  const ObjectId = require('mongodb').ObjectId
   const checkJWT = require('./checkJWT')
 
   try {
     const token = await checkJWT(req, users)
-    const mongoId = ObjectID(token.sub)
+    const mongoId = ObjectId(token.sub)
     const stringId = mongoId.toHexString()
     await users.updateOne(
       { _id: mongoId },

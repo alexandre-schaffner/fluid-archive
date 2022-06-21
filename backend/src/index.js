@@ -4,16 +4,16 @@ async function main () {
   const db = require('./database/db')
   const express = require('express')
   const fs = require('fs')
-  // const getLastLikedVideo = require('./middlewares/getLastLikedVideo')
+  const getLastLikedVideo = require('./middlewares/getLastLikedVideo')
   const putInUsersMap = require('./middlewares/putInUsersMap')
   const sync = require('./routes/sync')
-
   const app = express()
+
   try {
     const credentials = JSON.parse(fs.readFileSync('secret/oauth2Secret.json'))
     const dbName = process.env.DB_NAME
     const url = process.env.DB_URL
-    const fluidDB = db.connectToDB(url, dbName)
+    const fluidDB = await db.connectToDB(url, dbName)
     const port = process.env.PORT
     const usersCollection = fluidDB.collection('users')
     const usersMap = new Map()
@@ -39,12 +39,11 @@ async function main () {
     auth(app, usersCollection, credentials, usersMap)
     setInterval(async (usersMap) => {
       if (usersMap.size) {
+        // console.log(usersMap)
         for await (const [key, value] of usersMap.entries()) {
-          console.log(key, value)
-          // await getLastLikedVideo(user.google.oauth2Client, user.google.accessToken)
+          await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
         }
       }
-      console.log(usersMap)
     }, 5000, usersMap)
     // setInterval, checkNewSongs(usersMap)
 
