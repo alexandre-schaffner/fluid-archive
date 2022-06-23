@@ -6,11 +6,12 @@ module.exports = async ({ artist, title }) => {
       q: title
     }
   })
-  for (let i = 0; i < response.total; i++) {
+  console.log(artist, title)
+  for (let i = 0; i < response.data.total; i++) {
     if (
       // response.data[i].artist.name === artist &&
-      response.data[i].title === title
-    ) return response.data[i].id
+      response.data.data[i].title === title
+    ) return response.data.data[i].id
   }
   throw new Error('track not found')
 }

@@ -6,6 +6,8 @@ async function main () {
   const fs = require('fs')
   const getLastLikedVideo = require('./middlewares/getLastLikedVideo')
   const putInUsersMap = require('./middlewares/putInUsersMap')
+  const getTrackID = require('./middlewares/getTrackID')
+  const extractArtistTitle = require('./middlewares/extractArtistTitle')
   const sync = require('./routes/sync')
   const app = express()
 
@@ -41,11 +43,16 @@ async function main () {
       if (usersMap.size) {
         // console.log(usersMap)
         for await (const [key, value] of usersMap.entries()) {
-          await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
+          try {
+            const lastLikedVideo = await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
+            const { artist, title } = extractArtistTitle(lastLikedVideo)
+            console.log('track id: ', await getTrackID({ artist, title }))
+          } catch (err) {
+            console.error(err.message)
+          }
         }
       }
     }, 5000, usersMap)
-    // setInterval, checkNewSongs(usersMap)
 
     app.listen(port, function () {
       console.log('Platify listening at http://localhost:' + port)

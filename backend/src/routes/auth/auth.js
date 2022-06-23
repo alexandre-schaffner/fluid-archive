@@ -66,21 +66,21 @@ module.exports = function (app, usersCollection, credentials, usersMap) {
       if (usersMap.get(stringId) === undefined) {
         usersMap.set(stringId, {
           google: {
-            oauth2Client: oauth2Client,
+            oauth2Client,
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token
           },
-          lastLikedVideo: lastLikedVideo /*,
+          lastLikedVideo /*,
           sync: false */
         })
       } else {
         usersMap.set(stringId, {
           google: {
-            oauth2Client: oauth2Client,
+            oauth2Client,
             accessToken: tokens.access_token,
             refreshToken: tokens.refresh_token
           },
-          lastLikedVideo: lastLikedVideo,
+          lastLikedVideo,
           platform: usersMap.get(stringId).platform /*,
           sync: usersMap.get(stringId).platform !== undefined */
         })

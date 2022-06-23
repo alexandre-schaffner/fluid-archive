@@ -4,6 +4,7 @@
   "description": "This app allows you to automatically put the music you like on YouTube in a playlist of your favorite streaming platform.",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

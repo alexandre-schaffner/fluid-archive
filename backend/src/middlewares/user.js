@@ -11,7 +11,7 @@
 */
 async function checkExistingUser (users, email) {
   const query = {
-    email: email
+    email
   }
   const options = {
     projection: {
@@ -69,7 +69,8 @@ module.exports.register = async function (req, res, users) {
       sync: false
     }
     const result = await users.insertOne(doc)
-    if (result.insertedCount !== 1) {
+    console.log(result.acknowledged)
+    if (result.acknowledged !== true) {
       throw new Error('An error occured while inserting your data in the db')
     } else {
       try {

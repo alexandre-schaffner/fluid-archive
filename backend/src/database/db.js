@@ -1,5 +1,5 @@
 module.exports.connectToDB = async (url, dbName) => {
-  const credentials = 'X509-cert-431020356886184745.pem'
+  const credentials = 'secret/X509-cert-431020356886184745.pem'
   const { MongoClient, ServerApiVersion } = require('mongodb')
   const client = new MongoClient(url, {
     sslKey: credentials,

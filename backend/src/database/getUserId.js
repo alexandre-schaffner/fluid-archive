@@ -1,6 +1,6 @@
 module.exports = async (users, email) => {
   const options = { projection: { email: 1 } }
-  const query = { email: email }
+  const query = { email }
   const result = await users.findOne(query, options)
 
   if (result === null) {
