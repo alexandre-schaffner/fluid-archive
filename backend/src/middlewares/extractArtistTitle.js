@@ -1,20 +1,30 @@
 module.exports = (videoTitle) => {
   const parasites = [' x ', ' feat', ' ft. ', ' | ', ' /', /* ' & ', */ ' (', ' [']
   const splitedVideoTitle = videoTitle.split(' - ', 2)
-  let artist = null
-  let title = null
+  let ogArtist = null
+  let fArtist = null
+  let ogTitle = null
+  let fTitle = null
 
-  artist = splitedVideoTitle[0]
-  title = splitedVideoTitle[1]
-  if (!artist || !title) {
+  ogArtist = splitedVideoTitle[0]
+  ogTitle = splitedVideoTitle[1]
+  if (!ogArtist || !ogTitle) {
     throw new Error('no artist or title found in the video title')
   }
+  fArtist = ogArtist
+  fTitle = ogTitle
   for (const token of parasites) {
-    artist = artist.split(token, 1)[0]
-    title = title.split(token, 1)[0]
+    fArtist = fArtist.split(token, 1)[0]
+    fTitle = fTitle.split(token, 1)[0]
   }
   return ({
-    artist,
-    title
+    artist: {
+      original: ogArtist,
+      formated: fArtist
+    },
+    title: {
+      original: ogTitle,
+      formated: fTitle
+    }
   })
 }

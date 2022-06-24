@@ -1,3 +1,5 @@
+const { default: axios } = require('axios')
+
 async function main () {
   require('dotenv').config()
   const auth = require('./routes/auth/auth')
@@ -8,6 +10,7 @@ async function main () {
   const putInUsersMap = require('./middlewares/putInUsersMap')
   const getTrackID = require('./middlewares/getTrackID')
   const extractArtistTitle = require('./middlewares/extractArtistTitle')
+  const managePlaylist = require('./routes/managePlaylist')
   const sync = require('./routes/sync')
   const app = express()
 
@@ -24,6 +27,7 @@ async function main () {
     for await (const user of results) {
       try {
         await putInUsersMap(credentials, user._id, usersMap, usersCollection)
+        console.log(usersMap)
       } catch (err) {
         await usersCollection.updateOne(
           { _id: user._id },
@@ -33,20 +37,35 @@ async function main () {
         )
       }
     }
-    console.log(usersMap)
+    // console.log(usersMap)
 
     app.use(express.json())
 
     sync(app, credentials, usersCollection, usersMap)
     auth(app, usersCollection, credentials, usersMap)
+    managePlaylist(app, credentials, usersCollection, usersMap)
     setInterval(async (usersMap) => {
       if (usersMap.size) {
-        // console.log(usersMap)
+        console.log(usersMap)
         for await (const [key, value] of usersMap.entries()) {
           try {
             const lastLikedVideo = await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
-            const { artist, title } = extractArtistTitle(lastLikedVideo)
-            console.log('track id: ', await getTrackID({ artist, title }))
+            if (lastLikedVideo !== usersMap.get(key).lastLikedVideo) {
+              const desc = extractArtistTitle(lastLikedVideo)
+              const trackID = await getTrackID(desc)
+              console.log('artist: ' + desc.artist.original + 'title: ' + desc.title.formated + ', track id: ' + trackID)
+              await axios.post('https://api.deezer.com/playlist/' + value.platform.playlist + '/tracks', null, {
+                params: {
+                  access_token: value.platform.accessToken,
+                  songs: trackID
+                }
+              })
+              usersMap.set(key, {
+                google: usersMap.get(key).google,
+                platform: usersMap.get(key).platform,
+                lastLikedVideo
+              })
+            }
           } catch (err) {
             console.error(err.message)
           }

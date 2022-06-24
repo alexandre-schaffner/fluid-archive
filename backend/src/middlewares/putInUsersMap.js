@@ -5,6 +5,7 @@ module.exports = async (credentials, mongoId, usersMap, usersCollection) => {
   const oauth2Client = await getOAuth2Client(credentials, usersCollection, result._id)
   const lastLikedVideo = await getLastLikedVideo(oauth2Client, result.google.tokens.access_token) // récupérer la valeur stockée dans la db à la place ? // Cassé
   const stringId = result._id.toHexString()
+  const setPlaylistID = require('./setPlaylistID')
 
   usersMap.set(stringId, {
     google: {
@@ -15,7 +16,8 @@ module.exports = async (credentials, mongoId, usersMap, usersCollection) => {
     lastLikedVideo,
     platform: {
       platform: result.platform.platform,
-      accessToken: result.platform.accessToken
+      playlist: await setPlaylistID(result.platform.playlist, result.platform.tokens.accessToken),
+      accessToken: result.platform.tokens.accessToken
     }
   })
 }
