@@ -14,7 +14,7 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
         status: result.sync
       })
     } catch (err) {
-      res.send(err.message)
+      res.send({ error: err.message })
     }
   })
 
@@ -23,6 +23,7 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
       const jwt = await checkJWT(req, usersCollection)
       const mongoId = ObjectId(jwt.sub)
 
+      await putInUsersMap(credentials, mongoId, usersMap, usersCollection)
       const updateRes = await usersCollection.updateOne(
         { _id: mongoId },
         {
@@ -32,10 +33,13 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
       if (updateRes.matchedCount === 0) {
         throw new Error('You are not registered yet.')
       }
-      await putInUsersMap(credentials, mongoId, usersMap, usersCollection)
       res.send({ state: 'sync' })
     } catch (err) {
-      res.send(err.message)
+      if (err.message === 'user already sync') {
+        res.send({ state: 'sync' })
+      } else {
+        res.send({ error: err.message })
+      }
     }
   })
 
@@ -52,13 +56,13 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
         }
       )
       if (updateRes.matchedCount === 0) {
-        throw new Error('You are not registered yet.')
+        throw new Error('user are not registered yet')
       }
       usersMap.delete(stringId)
       res.send({ state: 'unsync' })
       console.log(usersMap)
     } catch (err) {
-      res.send(err.message)
+      res.send({ error: err.message })
     }
   })
 }

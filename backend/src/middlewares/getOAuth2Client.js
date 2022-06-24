@@ -10,10 +10,10 @@ module.exports = async (credentials, usersCollection, mongoId) => {
   const options = { projection: { _id: 1, 'google.tokens': 1 } }
   const result = await usersCollection.findOne(query, options)
 
-  if (result === null) {
-    throw new Error('You are not registered yet.')
-  }
   const tokens = result.google.tokens
+  if (!tokens.accessToken || !tokens.refreshToken) {
+    throw new Error('no Google account linked')
+  }
   oauth2Client.setCredentials({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken })
   return (oauth2Client)
 }

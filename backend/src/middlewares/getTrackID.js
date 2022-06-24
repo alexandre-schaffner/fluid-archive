@@ -1,7 +1,7 @@
 const axios = require('axios').default
 
 function format (original) {
-  const parasites = [' x ', ' feat', ' ft. ', ' | ', ' /', /* ' & ', */ ' (', ' [']
+  const parasites = [' x ', ' feat', ' ft. ', ' | ', ' /', /* ' & ', */ ' - ', ' (', ' [']
 
   for (const token of parasites) original = original.split(token, 1)[0]
   return original
@@ -14,6 +14,7 @@ module.exports = async (desc) => {
     }
   })
   for (let i = 0; i < response.data.data.length; i++) {
+    console.log(response.data.data[i].title)
     if (
       (response.data.data[i].title === desc.title.original ||
       response.data.data[i].title === desc.title.formated ||

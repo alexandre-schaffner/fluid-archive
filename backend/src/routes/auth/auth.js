@@ -1,7 +1,5 @@
 module.exports = function (app, usersCollection, credentials, usersMap) {
   const user = require('../../middlewares/user')
-  const getUserId = require('../../database/getUserId')
-  const getLastLikedVideo = require('../../middlewares/getLastLikedVideo')
   const { google } = require('googleapis')
   const OAuth2 = google.auth.OAuth2
 
@@ -60,32 +58,6 @@ module.exports = function (app, usersCollection, credentials, usersMap) {
           }
         }
       )
-      const mongoId = await getUserId(usersCollection, infos.email)
-      const stringId = mongoId.toHexString()
-      const lastLikedVideo = await getLastLikedVideo(oauth2Client, tokens.access_token)
-      if (usersMap.get(stringId) === undefined) {
-        usersMap.set(stringId, {
-          google: {
-            oauth2Client,
-            accessToken: tokens.access_token,
-            refreshToken: tokens.refresh_token
-          },
-          lastLikedVideo /*,
-          sync: false */
-        })
-      } else {
-        usersMap.set(stringId, {
-          google: {
-            oauth2Client,
-            accessToken: tokens.access_token,
-            refreshToken: tokens.refresh_token
-          },
-          lastLikedVideo,
-          platform: usersMap.get(stringId).platform /*,
-          sync: usersMap.get(stringId).platform !== undefined */
-        })
-      }
-      console.log('Google', usersMap)
       res.redirect('/auth/authorized')
     } catch (err) {
       res.send(err.message)

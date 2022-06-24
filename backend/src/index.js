@@ -50,7 +50,6 @@ async function main () {
           try {
             const lastLikedVideo = await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
             if (lastLikedVideo !== usersMap.get(key).lastLikedVideo) {
-              console.log(usersMap)
               const desc = extractArtistTitle(lastLikedVideo)
               const trackID = await getTrackID(desc)
               console.log('artist: ' + desc.artist.original + ', title: ' + desc.title.formated + ', track id: ' + trackID)
@@ -65,6 +64,7 @@ async function main () {
                 platform: usersMap.get(key).platform,
                 lastLikedVideo
               })
+              console.log(usersMap)
             }
           } catch (err) {
             console.error(err.message)
@@ -74,7 +74,7 @@ async function main () {
     }, 5000, usersMap)
 
     app.listen(port, function () {
-      console.log('Platify listening at http://localhost:' + port)
+      console.log('Fluid listening at http://localhost:' + port)
     })
   } catch (err) {
     console.error(err)

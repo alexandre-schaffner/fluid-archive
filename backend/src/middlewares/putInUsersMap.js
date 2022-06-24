@@ -7,6 +7,12 @@ module.exports = async (credentials, mongoId, usersMap, usersCollection) => {
   const stringId = result._id.toHexString()
   const setPlaylistID = require('./setPlaylistID')
 
+  if (usersMap.get(mongoId.toHexString()) !== undefined) throw new Error('user already synced')
+  if (
+    !result.google.tokens.accessToken ||
+    !result.google.tokens.refreshToken ||
+    !result.platform.tokens.accessToken
+  ) throw new Error('complete configuration first')
   usersMap.set(stringId, {
     google: {
       oauth2Client,

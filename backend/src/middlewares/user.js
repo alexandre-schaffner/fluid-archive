@@ -202,12 +202,10 @@ module.exports.deezerAuth = async function (req, res, users) {
 module.exports.getDeezerToken = async function (req, res, users, usersMap) {
   const ObjectId = require('mongodb').ObjectId
   const checkJWT = require('./checkJWT')
-  const setPlaylistID = require('./setPlaylistID')
 
   try {
     const token = await checkJWT(req, users)
     const mongoId = ObjectId(token.sub)
-    const stringId = mongoId.toHexString()
     const result = await users.findOne({ _id: mongoId })
     console.log(result)
     await users.updateOne(
@@ -218,26 +216,6 @@ module.exports.getDeezerToken = async function (req, res, users, usersMap) {
         }
       }
     )
-    if (usersMap.get(stringId) === undefined) {
-      usersMap.set(stringId, {
-        platform: {
-          platform: 'Deezer',
-          accessToken: req.body.access_token,
-          playlist: await setPlaylistID(result.platform.playlist, req.body.access_token)
-        }
-      })
-    } else {
-      usersMap.set(stringId, {
-        google: usersMap.get(stringId).google,
-        lastLikedVideo: usersMap.get(stringId).lastLikedVideo,
-        platform: {
-          platform: 'Deezer',
-          accessToken: req.body.access_token,
-          playlist: await setPlaylistID(result.platform.playlist, req.body.access_token)
-        }
-      })
-    }
-    console.log('Deezer', usersMap)
 
     res.send('Access token retrieved successfully')
   } catch (err) {
