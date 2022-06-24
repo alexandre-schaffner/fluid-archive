@@ -11,7 +11,7 @@ module.exports = (app, credentials, usersCollection, usersMap) => {
       const updateRes = await usersCollection.updateOne(
         { _id: mongoId },
         {
-          $set: { 'platform.platform': 'Deezer', 'platform.playlist': req.body.title }
+          $set: { 'platform.playlist': req.body.title }
         }
       )
       if (updateRes.matchedCount === 0) {

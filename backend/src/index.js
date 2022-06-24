@@ -46,14 +46,14 @@ async function main () {
     managePlaylist(app, credentials, usersCollection, usersMap)
     setInterval(async (usersMap) => {
       if (usersMap.size) {
-        console.log(usersMap)
         for await (const [key, value] of usersMap.entries()) {
           try {
             const lastLikedVideo = await getLastLikedVideo(value.google.oauth2Client, value.google.accessToken)
             if (lastLikedVideo !== usersMap.get(key).lastLikedVideo) {
+              console.log(usersMap)
               const desc = extractArtistTitle(lastLikedVideo)
               const trackID = await getTrackID(desc)
-              console.log('artist: ' + desc.artist.original + 'title: ' + desc.title.formated + ', track id: ' + trackID)
+              console.log('artist: ' + desc.artist.original + ', title: ' + desc.title.formated + ', track id: ' + trackID)
               await axios.post('https://api.deezer.com/playlist/' + value.platform.playlist + '/tracks', null, {
                 params: {
                   access_token: value.platform.accessToken,

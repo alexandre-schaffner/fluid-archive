@@ -13,7 +13,6 @@ module.exports = async (desc) => {
       q: desc.title.formated
     }
   })
-  console.log(response.data.data.length)
   for (let i = 0; i < response.data.data.length; i++) {
     if (
       (response.data.data[i].title === desc.title.original ||
